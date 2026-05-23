@@ -79,7 +79,7 @@ object Either:
     object Person:
       def apply(name: String, age: Int): Either[List[Error], Person] = 
         Either.map2All(lift(Name(name)), lift(Age(age)), Person(_, _))
-    val p = Person("Andrea", 24) // Right(Person(Name(Andrea),Age(24)))
-    val p1 = Person("", 24) // Left(List(Name must not be empty or null))
+    val p = Person("Andrea", 24)  // Right(Person(Name(Andrea),Age(24)))
+    val p1 = Person("", 24)       // Left(List(Name must not be empty or null))
     val p2 = Person("Andrea", -1) // Left(List(Age must be positive))
-    val p3 = Person("", -1) // Left(List(Name must not be empty or null, Age must be positive))
+    val p3 = Person("", -1)       // Left(List(Name must not be empty or null, Age must be positive))
