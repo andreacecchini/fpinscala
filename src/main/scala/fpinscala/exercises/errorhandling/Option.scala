@@ -57,7 +57,19 @@ object Option:
     a.flatMap(a => b.map(b => f(a, b)))
 
   // Some(1) :: Some(2) :: Some(3) => Some(1 :: 2 :: 3)
+  // extension [A] (l: List[A])
+  //   def myFoldLeft[B](acc: B)(f: (B, A) => B): B = l match
+  //     case head :: next => myFoldLeft(f(acc, head))(f)
+  //     case Nil => acc
+    
+  //   def myFoldRight[B](init: B)(f: (A, B) => B): B = l match
+  //     case head :: next => f(head, next.myFoldRight(init)(f))
+  //     case Nil => init
+    
   def sequence[A](as: List[Option[A]]): Option[List[A]] = 
+    // as match
+    //   case head :: next => map2(head, sequence(next))(_ :: _)
+    //   case Nil => Some(List())
     as.foldRight(Some(List[A]()))((e, acc) => map2(e, acc)(_ :: _))
   
   @main def testSequence(): Unit = 
