@@ -2,20 +2,34 @@ package fpinscala.exercises.errorhandling
 
 // Hide std library `Option` since we are writing our own in this chapter
 import scala.{Option as _, Some as _, None as _}
+import fpinscala.answers.datastructures.List.map
 
 enum Option[+A]:
   case Some(get: A)
   case None
 
-  def map[B](f: A => B): Option[B] = ???
+  def map[B](f: A => B): Option[B] = 
+    flatMap(a => Some(f(a)))
+  
 
-  def getOrElse[B>:A](default: => B): B = ???
+  def getOrElse[B>:A](default: => B): B = this match
+    case Some(get) => get
+    case _ => default
+  
 
-  def flatMap[B](f: A => Option[B]): Option[B] = ???
+  def flatMap[B](f: A => Option[B]): Option[B] = this match
+    case Some(get) => f(get)
+    case _ => None
+  
 
-  def orElse[B>:A](ob: => Option[B]): Option[B] = ???
+  def orElse[B>:A](ob: => Option[B]): Option[B] = this match
+    case Some(_) => this
+    case _ => ob
+  
 
-  def filter(f: A => Boolean): Option[A] = ???
+  def filter(f: A => Boolean): Option[A] = 
+    flatMap(a => if f(a) then Some(a) else None)
+  
 
 object Option:
 
@@ -36,10 +50,25 @@ object Option:
     if xs.isEmpty then None
     else Some(xs.sum / xs.length)
 
-  def variance(xs: Seq[Double]): Option[Double] = ???
+  def variance(xs: Seq[Double]): Option[Double] = 
+    mean(xs).flatMap(m => mean(xs.map(x => math.pow(x-m, 2))))
 
-  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = ???
+  def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = 
+    a.flatMap(a => b.map(b => f(a, b)))
 
-  def sequence[A](as: List[Option[A]]): Option[List[A]] = ???
+  // Some(1) :: Some(2) :: Some(3) => Some(1 :: 2 :: 3)
+  def sequence[A](as: List[Option[A]]): Option[List[A]] = 
+    as.foldRight(Some(List[A]()))((e, acc) => map2(e, acc)(_ :: _))
+  
+  @main def testSequence(): Unit = 
+    println:
+      sequence(List())  // Some(Nil)
+    println:
+      sequence(List(Some(1))) // Some(1 :: Nil)
+    println:
+      sequence(List(Some(1), Some(2), Some(3))) // Some(1 :: 2 :: 3 :: Nil)
+    println:
+      sequence(List(Some(1), None, Some(3))) // None
 
-  def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = ???
+  def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = 
+    sequence(as.map(f(_)))
